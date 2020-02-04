@@ -135,7 +135,7 @@ uninstall-runit:
 	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/finish"
 	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/conf"
 	$(RM) -r "$(DESTDIR)$(INITDIR_RUNIT)/supervise"
-	$(RM) -d "$(DESTDIR)$(INITDIR_RUNIT)"
+	-$(RM) -d "$(DESTDIR)$(INITDIR_RUNIT)"
 
 uninstall-systemd-all: uninstall-bin uninstall-man uninstall-systemd
 
