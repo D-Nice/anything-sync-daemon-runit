@@ -1,3 +1,4 @@
 #!/bin/sh
+exec 2>&1
 /usr/bin/anything-sync-daemon sync
-exec chpst -L /run/asd.lock -b anything-sync-daemon /bin/sh ./resync
+exec chpst -L /run/lock/asd.lock -b anything-sync-daemon /bin/sh ./resync
