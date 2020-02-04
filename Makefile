@@ -6,6 +6,7 @@ CONFDIR = /etc
 CRONDIR = /etc/cron.hourly
 INITDIR_SYSTEMD = /usr/lib/systemd/system
 INITDIR_UPSTART = /etc/init.d
+INITDIR_RUNIT = /etc/sv/asd
 BINDIR = $(PREFIX)/bin
 DOCDIR = $(PREFIX)/share/doc/$(PN)
 MANDIR = $(PREFIX)/share/man/man1
@@ -73,14 +74,31 @@ install-upstart:
 	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(INSTALL_SCRIPT) init/asd.upstart "$(DESTDIR)$(INITDIR_UPSTART)/asd"
 
+install-runit:
+	$(Q)echo -e '\033[1;32mInstalling runit files...\033[0m'
+	$(INSTALL_DIR) "$(DESTDIR)$(CONFDIR)"
+	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_RUNIT)"
+	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
+	$(INSTALL_DATA) init/runit/conf "$(DESTDIR)$(INITDIR_RUNIT)/conf"
+	$(INSTALL_SCRIPT) init/runit/resync "$(DESTDIR)$(INITDIR_RUNIT)/resync"
+	$(INSTALL_SCRIPT) init/runit/run "$(DESTDIR)$(INITDIR_RUNIT)/run"
+	$(INSTALL_SCRIPT) init/runit/finish "$(DESTDIR)$(INITDIR_RUNIT)/finish"
+	ln -sf /etc/sv/asd /var/service/
+	$(Q)echo "Update /etc/asd.conf for initial configuration"
+	$(Q)echo "Restart the service on subsequent changes"
+	$(Q)echo "Update /etc/sv/asd/conf to change default resync interval, no restart needed"
+
 install-systemd-all: install-bin install-man install-systemd
 
 install-upstart-all: install-bin install-man install-cron install-upstart
+
+install-runit-all: install-bin install-man install-runit
 
 install:
 	$(Q)echo "run one of the following:"
 	$(Q)echo "  make install-systemd-all (systemd based systems)"
 	$(Q)echo "  make install-upstart-all (upstart based systems)"
+	$(Q)echo "  make install-runit-all (runit based systems)"
 	$(Q)echo
 	$(Q)echo "or check out the Makefile for specific rules"
 
@@ -109,18 +127,31 @@ uninstall-upstart:
 	$(RM) "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(RM) "$(DESTDIR)$(INITDIR_UPSTART)/asd"
 
+uninstall-runit:
+	$(RM) "$(DESTDIR)$(CONFDIR)/asd.conf"
+	$(RM) "/var/service/asd"
+	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/run"
+	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/resync"
+	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/finish"
+	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/conf"
+	$(RM) -r "$(DESTDIR)$(INITDIR_RUNIT)/supervise"
+	$(RM) -d "$(DESTDIR)$(INITDIR_RUNIT)"
+
 uninstall-systemd-all: uninstall-bin uninstall-man uninstall-systemd
 
 uninstall-upstart-all: uninstall-bin uninstall-man uninstall-cron uninstall-upstart
+
+uninstall-runit-all: uninstall-bin uninstall-man uninstall-runit
 
 uninstall:
 	$(Q)echo "run one of the following:"
 	$(Q)echo "  make uninstall-systemd-all (systemd based systems)"
 	$(Q)echo "  make uninstall-upstart-all (upstart based systems)"
+	$(Q)echo "  make uninstall-runit-all (runit based systems)"
 	$(Q)echo
 	$(Q)echo "or check out the Makefile for specific rules"
 
 clean:
 	$(RM) common/$(PN)
 
-.PHONY: help install-bin install-man install-cron install-systemd install-upstart install-systemd-all install-upstart-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-systemd-all uninstall clean
+.PHONY: help install-bin install-man install-cron install-systemd install-upstart install-runit install-systemd-all install-upstart-all install-runit-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-runit uninstall-systemd-all uninstall-runit-all uninstall clean
