@@ -1,0 +1,3 @@
+#!/bin/sh
+/usr/bin/anything-sync-daemon sync
+exec chpst -L /run/asd.lock -b anything-sync-daemon /bin/sh ./resync
