@@ -15,7 +15,7 @@ BSHDIR = $(PREFIX)/share/bash-completion/completions
 # set to anything except 0 to enable manpage compression
 COMPRESS_MAN = 1
 
-RM = rm
+RM = rm -f
 SED = sed
 INSTALL = install -p
 INSTALL_PROGRAM = $(INSTALL) -m755
@@ -91,10 +91,10 @@ uninstall-bin:
 	$(RM) "$(DESTDIR)/$(BSHDIR)/asd"
 
 uninstall-man:
-	$(RM) -f "$(DESTDIR)$(MANDIR)/$(PN).1.gz"
-	$(RM) -f "$(DESTDIR)$(MANDIR)/asd.1.gz"
-	$(RM) -f "$(DESTDIR)$(MANDIR)/$(PN).1"
-	$(RM) -f "$(DESTDIR)$(MANDIR)/asd.1"
+	$(RM) "$(DESTDIR)$(MANDIR)/$(PN).1.gz"
+	$(RM) "$(DESTDIR)$(MANDIR)/asd.1.gz"
+	$(RM) "$(DESTDIR)$(MANDIR)/$(PN).1"
+	$(RM) "$(DESTDIR)$(MANDIR)/asd.1"
 
 uninstall-cron:
 	$(RM) "$(DESTDIR)$(CRONDIR)/asd-update"
@@ -121,6 +121,6 @@ uninstall:
 	$(Q)echo "or check out the Makefile for specific rules"
 
 clean:
-	$(RM) -f common/$(PN)
+	$(RM) common/$(PN)
 
 .PHONY: help install-bin install-man install-cron install-systemd install-upstart install-systemd-all install-upstart-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-systemd-all uninstall clean
