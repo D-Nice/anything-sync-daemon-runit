@@ -12,6 +12,7 @@ DOCDIR = $(PREFIX)/share/doc/$(PN)
 MANDIR = $(PREFIX)/share/man/man1
 ZSHDIR = $(PREFIX)/share/zsh/site-functions
 BSHDIR = $(PREFIX)/share/bash-completion/completions
+LOGDIR = /var/log/asd
 
 # set to anything except 0 to enable manpage compression
 COMPRESS_MAN = 1
@@ -78,11 +79,14 @@ install-runit:
 	$(Q)echo -e '\033[1;32mInstalling runit files...\033[0m'
 	$(INSTALL_DIR) "$(DESTDIR)$(CONFDIR)"
 	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_RUNIT)"
+	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_RUNIT)/log"
+	$(INSTALL_DIR) -m600 "$(DESTDIR)$(LOGDIR)"
 	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(INSTALL_DATA) init/runit/conf "$(DESTDIR)$(INITDIR_RUNIT)/conf"
 	$(INSTALL_SCRIPT) init/runit/resync "$(DESTDIR)$(INITDIR_RUNIT)/resync"
 	$(INSTALL_SCRIPT) init/runit/run "$(DESTDIR)$(INITDIR_RUNIT)/run"
 	$(INSTALL_SCRIPT) init/runit/finish "$(DESTDIR)$(INITDIR_RUNIT)/finish"
+	$(INSTALL_SCRIPT) init/runit/log/run "$(DESTDIR)$(INITDIR_RUNIT)/log/run"
 	ln -sf /etc/sv/asd /var/service/
 	$(Q)echo "Update /etc/asd.conf for initial configuration"
 	$(Q)echo "Restart the service on subsequent changes"
