@@ -4,3 +4,5 @@
 # sleep interval exceeds the newly set one.
 #
 #export RESYNC_INTERVAL_SECS=1800
+
+export LOCKFILE=/run/lock/asd.lock
