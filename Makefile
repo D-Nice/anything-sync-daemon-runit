@@ -18,6 +18,7 @@ LOGDIR = /var/log/asd
 COMPRESS_MAN = 1
 
 RM = rm -f
+CP = cp --preserve=all
 SED = sed
 INSTALL = install -p
 INSTALL_PROGRAM = $(INSTALL) -m755
@@ -162,11 +163,13 @@ uninstall-runit: clean-runit-rc
 	$(RM) -r "$(DESTDIR)$(INITDIR_RUNIT)/supervise"
 	-$(RM) -d "$(DESTDIR)$(INITDIR_RUNIT)"
 
-uninstall-systemd-all: uninstall-bin uninstall-man uninstall-systemd
+uninstall-all: uninstall-bin uninstall-man backup-conf
 
-uninstall-upstart-all: uninstall-bin uninstall-man uninstall-cron uninstall-upstart
+uninstall-systemd-all: uninstall-all uninstall-systemd
 
-uninstall-runit-all: uninstall-bin uninstall-man uninstall-runit
+uninstall-upstart-all: uninstall-all uninstall-cron uninstall-upstart
+
+uninstall-runit-all: uninstall-all uninstall-runit
 
 uninstall:
 	$(Q)echo "run one of the following:"
@@ -179,4 +182,10 @@ uninstall:
 clean:
 	$(RM) common/$(PN)
 
-.PHONY: help install-bin install-man install-cron install-systemd install-upstart setup-runit install-runit install-systemd-all install-upstart-all install-runit-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-runit uninstall-systemd-all uninstall-runit-all uninstall clean clean-runit-rc setup-runit-rc
+backup-conf:
+	$(CP) "$(DESTDIR)$(CONFDIR)/asd.conf" "$(DESTDIR)$(CONFDIR)/.asd.conf.bak"
+
+restore-conf:
+	mv -f "$(DESTDIR)$(CONFDIR)/.asd.conf.bak" "$(DESTDIR)$(CONFDIR)/asd.conf"
+
+.PHONY: help install-bin install-man install-cron install-systemd install-upstart setup-runit install-runit install-systemd-all install-upstart-all install-runit-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-runit uninstall-systemd-all uninstall-runit-all uninstall clean clean-runit-rc setup-runit-rc backup-conf restore-conf uninstall-all
