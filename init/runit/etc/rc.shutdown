@@ -1,0 +1,2 @@
+# ASD
+[ -x /usr/bin/anything-sync-daemon ] && ( sync; /usr/bin/anything-sync-daemon unsync && echo "asd unsync successful" || echo "warn: asd unsync failed"; sync )

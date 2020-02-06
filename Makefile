@@ -75,22 +75,43 @@ install-upstart:
 	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(INSTALL_SCRIPT) init/asd.upstart "$(DESTDIR)$(INITDIR_UPSTART)/asd"
 
-install-runit:
-	$(Q)echo -e '\033[1;32mInstalling runit files...\033[0m'
-	$(INSTALL_DIR) "$(DESTDIR)$(CONFDIR)"
+clean-runit-rc:
+	sed -e '/^# ASD$$/ d' -e '/^\[ -x \/usr\/bin\/anything-sync-daemon \] && ( sync/ d' < /etc/rc.shutdown >> /etc/rc.shutdown.tmp && cp --attributes-only /etc/rc.shutdown /etc/rc.shutdown.tmp && mv -f /etc/rc.shutdown.tmp /etc/rc.shutdown
+
+clean-runit-sv:
+	-sv force-stop asd
+	$(RM) "/var/service/asd"
+
+
+# this should help avoid data loss issues, from the unsync failing due to runit timeout
+setup-runit-rc: clean-runit-rc
+	cat init/runit/etc/rc.shutdown >> /etc/rc.shutdown
+
+setup-runit:
 	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_RUNIT)"
 	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_RUNIT)/log"
 	$(INSTALL_DIR) -m600 "$(DESTDIR)$(LOGDIR)"
-	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(INSTALL_DATA) init/runit/conf "$(DESTDIR)$(INITDIR_RUNIT)/conf"
 	$(INSTALL_SCRIPT) init/runit/resync "$(DESTDIR)$(INITDIR_RUNIT)/resync"
 	$(INSTALL_SCRIPT) init/runit/run "$(DESTDIR)$(INITDIR_RUNIT)/run"
 	$(INSTALL_SCRIPT) init/runit/finish "$(DESTDIR)$(INITDIR_RUNIT)/finish"
 	$(INSTALL_SCRIPT) init/runit/log/run "$(DESTDIR)$(INITDIR_RUNIT)/log/run"
-	ln -sf /etc/sv/asd /var/service/
-	$(Q)echo "Update /etc/asd.conf for initial configuration"
+
+install-runit: setup-runit setup-runit-rc
+	$(Q)echo -e '\033[1;32mInstalling runit files...\033[0m'
+	$(INSTALL_DATA) common/asd.conf "$(DESTDIR)$(CONFDIR)/asd.conf"
+	$(Q)echo "Update /etc/asd.conf for initial configuration, and then enable runit service asd"
 	$(Q)echo "Restart the service on subsequent changes"
 	$(Q)echo "Update /etc/sv/asd/conf to change default resync interval, no restart needed"
+	$(Q)echo "If syncing directories times out, consider increasing SVWAIT from 7 in your /etc/rc.conf"
+
+# allows runit updates without existing asd.conf being affected.
+update-runit:
+	$(Q)echo -e '\033[1;32mUpdating runit files...\033[0m'
+	$(MAKE) clean-runit-sv
+	$(MAKE) setup-runit
+	-ln -s /etc/sv/asd /var/service
+	-sv start asd
 
 install-systemd-all: install-bin install-man install-systemd
 
@@ -131,9 +152,9 @@ uninstall-upstart:
 	$(RM) "$(DESTDIR)$(CONFDIR)/asd.conf"
 	$(RM) "$(DESTDIR)$(INITDIR_UPSTART)/asd"
 
-uninstall-runit:
+uninstall-runit: clean-runit-rc
 	$(RM) "$(DESTDIR)$(CONFDIR)/asd.conf"
-	$(RM) "/var/service/asd"
+	$(MAKE) clean-runit-sv
 	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/run"
 	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/resync"
 	$(RM) "$(DESTDIR)$(INITDIR_RUNIT)/finish"
@@ -158,4 +179,4 @@ uninstall:
 clean:
 	$(RM) common/$(PN)
 
-.PHONY: help install-bin install-man install-cron install-systemd install-upstart install-runit install-systemd-all install-upstart-all install-runit-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-runit uninstall-systemd-all uninstall-runit-all uninstall clean
+.PHONY: help install-bin install-man install-cron install-systemd install-upstart setup-runit install-runit install-systemd-all install-upstart-all install-runit-all install uninstall-bin uninstall-man uninstall-cron uninstall-systemd uninstall-upstart uninstall-runit uninstall-systemd-all uninstall-runit-all uninstall clean clean-runit-rc setup-runit-rc
