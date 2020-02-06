@@ -1,0 +1,11 @@
+#!/bin/sh
+exec 2>&1
+[ -r conf ] && . ./conf
+fuser "$LOCKFILE" \
+  && echo "Unexpected locks detected..." \
+  && exit 1
+/usr/bin/anything-sync-daemon sync
+exec chpst \
+  -L "$LOCKFILE" \
+  -b anything-sync-daemon \
+  /bin/sh ./resync

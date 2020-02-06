@@ -1,0 +1,8 @@
+# Uncomment to customize the resync interval.
+# Does not require a restart of the service
+# and will update current sleep time, if current
+# sleep interval exceeds the newly set one.
+#
+#export RESYNC_INTERVAL_SECS=1800
+
+export LOCKFILE=/run/lock/asd.lock

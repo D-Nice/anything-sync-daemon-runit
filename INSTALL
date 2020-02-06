@@ -7,6 +7,7 @@ DEPENDENCIES
  a supported init system
  -systemd
  -upstart
+ -runit
 
 WARNING
 To avoid data loss, it is HIGHLY recommended that users stop any running
@@ -24,11 +25,23 @@ BUILDING
 
   # make install-systemd-all
   # make install-upstart-all
+  # make install-runit-all
 
  As of v3.13, the Makefiles for systemd-native distros such as Arch, Exherbo,
  and Fedora, no longer install the deprecated cron script using a systemd
  timer instead. Users may override and install the deprecated cron script by
  running make with `install-with-cron` instead  of `install` at this point.
+
+UNINSTALL
+
+ Run the uninstall make rule specific for your distro type. For Void, you
+ would run:
+
+  # make uninstall-runit-all
+
+ In case you are updating, it will also run `make backup-conf`, allowing you
+ to restore your previous config via `make restore-conf` after having re-run
+ the appropriate install rule.
 
 USE A DISTRO PROVIDED PACKAGE
  ARCH LINUX

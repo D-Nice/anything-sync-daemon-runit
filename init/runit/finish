@@ -1,0 +1,7 @@
+#!/bin/sh
+exec 2>&1
+[ -r conf ] && . ./conf
+fuser -k "$LOCKFILE" \
+  && echo "Succesfully killed PIDs locking asd.lock" \
+  || echo "Failed to kill PIDs locking asd.lock..."
+exec /usr/bin/anything-sync-daemon unsync

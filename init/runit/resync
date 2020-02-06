@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+DAEMON_FILE=${DAEMON_FILE:-"/run/asd"}
+RESYNC_INTERVAL_SECS=${RESYNC_INTERVAL_SECS:-3600}
+PID_CHECK_INTERVAL_SECS=${PID_CHECK_INTERVAL_SECS:-10}
+SLEEP_COUNT=$RESYNC_INTERVAL_SECS
+while [ -f "$DAEMON_FILE" ]; do
+  if [ "$SLEEP_COUNT" -lt 0 ]; then
+    /usr/bin/anything-sync-daemon resync
+    SLEEP_COUNT=$RESYNC_INTERVAL_SECS
+  fi
+  [ -r conf ] && . ./conf
+  if [ "$SLEEP_COUNT" -gt "$RESYNC_INTERVAL_SECS" ]; then
+    SLEEP_COUNT=$RESYNC_INTERVAL_SECS
+  fi
+
+  sleep "$PID_CHECK_INTERVAL_SECS"
+  SLEEP_COUNT=$(( SLEEP_COUNT - PID_CHECK_INTERVAL_SECS ))
+done
